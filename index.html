@@ -55,6 +55,26 @@
 
   <canvas id="game-canvas" class="hidden"></canvas>
 
+  <div id="screen-kit-mother" class="screen kit-mother-screen hidden" role="dialog" aria-labelledby="kit-mother-title">
+    <svg class="kit-mother-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Mother (larger) -->
+      <ellipse cx="175" cy="155" rx="72" ry="22" fill="rgba(0,0,0,0.15)"/>
+      <path d="M120 150 Q95 130 88 100 Q85 75 100 58 L108 35 L118 52 Q135 48 155 50 L172 42 L178 28 L188 48 Q210 58 222 78 Q232 105 225 130 Q218 148 200 152 Z" fill="#b8956a" stroke="#7a5c3a" stroke-width="2"/>
+      <path d="M225 115 Q248 95 258 72 Q262 55 248 48" fill="none" stroke="#b8956a" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="138" cy="78" r="7" fill="#8fd4ff"/><circle cx="168" cy="76" r="7" fill="#8fd4ff"/>
+      <circle cx="138" cy="78" r="3.5" fill="#222"/><circle cx="168" cy="76" r="3.5" fill="#222"/>
+      <path d="M148 92 Q153 88 158 92" fill="none" stroke="#5a4030" stroke-width="1.5"/>
+      <!-- Kit (small, snuggled) — fill updated from your fur color in JS -->
+      <path id="kit-intro-body" d="M75 155 Q58 145 52 125 Q50 105 62 92 L68 72 L78 82 Q88 78 98 80 L108 88 L112 72 L118 85 Q128 92 132 105 Q134 118 128 132 Q120 148 102 152 Z" fill="#d4a574" stroke="#9a7048" stroke-width="1.5"/>
+      <circle cx="88" cy="98" r="5" fill="#9ee0ff"/><circle cx="102" cy="96" r="5" fill="#9ee0ff"/>
+      <circle cx="88" cy="98" r="2.5" fill="#111"/><circle cx="102" cy="96" r="2.5" fill="#111"/>
+      <path d="M118 125 Q125 118 132 122" fill="none" stroke="#c9a080" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <h2 class="game-title" id="kit-mother-title" style="font-size:1.15rem;">Your mother</h2>
+    <p class="game-sub kit-mother-text">When you’re a kit, the first cat you see is your mother. She’s right here with you.</p>
+    <button type="button" class="btn-primary" id="btn-kit-mother-continue">Look around the camp</button>
+  </div>
+
   <div id="hud" class="hidden">
     <div class="hud-card">
       <div class="warrior-name" id="hud-name">—</div>

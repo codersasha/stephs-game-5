@@ -37,6 +37,8 @@
   const joystick = $('joystick');
   const joystickKnob = $('joystick-knob');
   const hintBar = $('hint-bar');
+  const kitMotherScreen = $('screen-kit-mother');
+  const btnKitMotherContinue = $('btn-kit-mother-continue');
 
   let profile = null;
   let scene, camera, renderer;
@@ -385,25 +387,13 @@
     updateSuffixRow();
   }
 
-  function startGame () {
-    initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  function tintKitIntroSvg () {
+    const fur = profile && profile.furColor ? profile.furColor : '#d4a574';
+    const kitPath = kitMotherScreen && kitMotherScreen.querySelector('#kit-intro-body');
+    if (kitPath) kitPath.setAttribute('fill', fur);
+  }
 
-    isMobile = detectMobile();
-    initThree();
-    applyRoleCameraFov();
-
-    const p = profile.position;
-    if (typeof p.x !== 'number') p.x = 0;
-    if (typeof p.z !== 'number') p.z = 10;
-    if (typeof p.yaw !== 'number') p.yaw = 0;
-    cameraYaw = p.yaw;
-    cameraPitch = 0;
-
-    canvas.classList.remove('hidden');
-    hud.classList.remove('hidden');
-    btnMenu.classList.remove('hidden');
-
+  function beginPlaySession () {
     hudName.textContent = GameLogic.getWarriorName(profile);
     hudRole.textContent = GameLogic.getRoleLabel(profile);
 
@@ -434,6 +424,51 @@
     }, 4000);
   }
 
+  function startGame () {
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+    isMobile = detectMobile();
+    initThree();
+    applyRoleCameraFov();
+
+    const p = profile.position;
+    if (typeof p.x !== 'number') p.x = 0;
+    if (typeof p.z !== 'number') p.z = 10;
+    if (typeof p.yaw !== 'number') p.yaw = 0;
+    cameraYaw = p.yaw;
+    cameraPitch = 0;
+
+    hudName.textContent = GameLogic.getWarriorName(profile);
+    hudRole.textContent = GameLogic.getRoleLabel(profile);
+
+    if (isKitRole()) {
+      canvas.classList.add('hidden');
+      hud.classList.add('hidden');
+      btnMenu.classList.add('hidden');
+      touchLookZone.classList.add('hidden');
+      joystickZone.classList.add('hidden');
+      tintKitIntroSvg();
+      kitMotherScreen.classList.remove('hidden');
+
+      btnKitMotherContinue.onclick = function onKitContinue () {
+        btnKitMotherContinue.onclick = null;
+        kitMotherScreen.classList.add('hidden');
+        canvas.classList.remove('hidden');
+        hud.classList.remove('hidden');
+        btnMenu.classList.remove('hidden');
+        beginPlaySession();
+      };
+      return;
+    }
+
+    canvas.classList.remove('hidden');
+    hud.classList.remove('hidden');
+    btnMenu.classList.remove('hidden');
+
+    beginPlaySession();
+  }
+
   function pauseToMenu () {
     isPlaying = false;
     if (saveTimer) {
@@ -454,6 +489,11 @@
       scene = null;
       camera = null;
       renderer = null;
+    }
+
+    if (kitMotherScreen) {
+      kitMotherScreen.classList.add('hidden');
+      if (btnKitMotherContinue) btnKitMotherContinue.onclick = null;
     }
 
     canvas.classList.add('hidden');

@@ -47,6 +47,23 @@ body {
   display: none;
 }
 
+/* Kit intro — must sit above the 3D canvas */
+.kit-mother-screen {
+  z-index: 18;
+  background: linear-gradient(180deg, #2a2218 0%, #1a1510 50%, #142018 100%);
+}
+
+.kit-mother-svg {
+  width: min(300px, 85vw);
+  height: auto;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.45));
+}
+
+.kit-mother-text {
+  max-width: 24rem;
+}
+
 .title-svg {
   width: min(220px, 55vw);
   height: auto;
