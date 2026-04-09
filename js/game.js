@@ -2,8 +2,13 @@
   'use strict';
 
   const WORLD_HALF = 88;
+  /** Adult cat eye height (meters-ish). Kits are much lower — you feel small. */
   const EYE_HEIGHT = 1.12;
+  const EYE_HEIGHT_KIT = 0.4;
   const MOVE_SPEED = 11;
+  const MOVE_SPEED_KIT = 6.2;
+  const FOV_ADULT = 72;
+  const FOV_KIT = 80;
   const LOOK_SENS_MOUSE = 0.0022;
   const LOOK_SENS_TOUCH = 0.0045;
 
@@ -121,7 +126,7 @@
     scene.background = new THREE.Color(sky);
     scene.fog = new THREE.Fog(0xa8c8b8, 25, 130);
 
-    camera = new THREE.PerspectiveCamera(72, w / h, 0.08, 220);
+    camera = new THREE.PerspectiveCamera(FOV_ADULT, w / h, 0.08, 220);
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(w, h);
@@ -174,6 +179,24 @@
     clock = new THREE.Clock();
   }
 
+  function isKitRole () {
+    return profile && profile.rank === 'kit';
+  }
+
+  function getEyeHeight () {
+    return isKitRole() ? EYE_HEIGHT_KIT : EYE_HEIGHT;
+  }
+
+  function getMoveSpeed () {
+    return isKitRole() ? MOVE_SPEED_KIT : MOVE_SPEED;
+  }
+
+  function applyRoleCameraFov () {
+    if (!camera) return;
+    camera.fov = isKitRole() ? FOV_KIT : FOV_ADULT;
+    camera.updateProjectionMatrix();
+  }
+
   function resize () {
     if (!camera || !renderer) return;
     const w = window.innerWidth;
@@ -189,7 +212,7 @@
     const lookDist = 14;
     const camX = p.x;
     const camZ = p.z;
-    const camY = EYE_HEIGHT;
+    const camY = getEyeHeight();
     const lookX = camX - Math.sin(cameraYaw) * Math.cos(pitch) * lookDist;
     const lookZ = camZ - Math.cos(cameraYaw) * Math.cos(pitch) * lookDist;
     const lookY = camY + Math.sin(pitch) * lookDist;
@@ -220,7 +243,7 @@
       str /= len;
     }
 
-    const speed = MOVE_SPEED * dt;
+    const speed = getMoveSpeed() * dt;
     const sin = Math.sin(cameraYaw);
     const cos = Math.cos(cameraYaw);
     const dx = (-sin * fwd + cos * str) * speed;
@@ -368,6 +391,7 @@
 
     isMobile = detectMobile();
     initThree();
+    applyRoleCameraFov();
 
     const p = profile.position;
     if (typeof p.x !== 'number') p.x = 0;
