@@ -3,35 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0b">
   <title>Warrior Cats — Forest RP (3D)</title>
   <meta name="description" content="A first-person Warrior Cats roleplay. Create your cat and explore the forest.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+  <div class="system-topbar" aria-hidden="true">
+    <span class="joy-dot joy-dot--blue"></span>
+    <span class="joy-dot joy-dot--red"></span>
+    <span class="system-topbar__title">Warrior Cats</span>
+  </div>
+
   <div id="screen-title" class="screen">
-    <svg class="title-svg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M60 140 Q40 130 35 110 Q30 90 40 75 Q45 65 50 60 L55 40 L65 55 Q75 50 90 48 Q110 46 125 50 L135 55 L140 38 Q145 55 145 65 Q155 75 160 90 Q165 110 155 130 Q150 140 140 140 Z" fill="#c9753d" stroke="#8b5a2b" stroke-width="2"/>
-      <path d="M155 120 Q175 110 185 90 Q190 75 180 65" fill="none" stroke="#c9753d" stroke-width="8" stroke-linecap="round"/>
-      <circle cx="80" cy="70" r="6" fill="#6ae"/><circle cx="115" cy="70" r="6" fill="#6ae"/>
-      <circle cx="80" cy="70" r="3" fill="#111"/><circle cx="115" cy="70" r="3" fill="#111"/>
-      <path d="M95 82 L100 78 L105 82 Z" fill="#e8a0a8"/>
-    </svg>
-    <h1 class="game-title">Warrior Cats — Forest RP</h1>
-    <p class="game-sub">You’re the cat. Walk the forest in first person — play, don’t rush to “win.”</p>
-    <button type="button" class="btn-primary" id="btn-start">Create your cat</button>
-    <button type="button" class="btn-secondary" id="btn-continue" hidden>Continue last cat</button>
+    <div class="ui-panel">
+      <svg class="title-svg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M60 140 Q40 130 35 110 Q30 90 40 75 Q45 65 50 60 L55 40 L65 55 Q75 50 90 48 Q110 46 125 50 L135 55 L140 38 Q145 55 145 65 Q155 75 160 90 Q165 110 155 130 Q150 140 140 140 Z" fill="#c9753d" stroke="#8b5a2b" stroke-width="2"/>
+        <path d="M155 120 Q175 110 185 90 Q190 75 180 65" fill="none" stroke="#c9753d" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="80" cy="70" r="6" fill="#6ae"/><circle cx="115" cy="70" r="6" fill="#6ae"/>
+        <circle cx="80" cy="70" r="3" fill="#111"/><circle cx="115" cy="70" r="3" fill="#111"/>
+        <path d="M95 82 L100 78 L105 82 Z" fill="#e8a0a8"/>
+      </svg>
+      <h1 class="game-title">Forest RP</h1>
+      <p class="game-sub">First-person Warrior Cats play. Explore the forest — take your time.</p>
+      <button type="button" class="btn-primary" id="btn-start">Create your cat</button>
+      <button type="button" class="btn-secondary" id="btn-continue" hidden>Continue</button>
+    </div>
   </div>
 
   <div id="screen-setup" class="screen hidden">
-    <h2 class="game-title" style="font-size: 1.2rem;">Who are you?</h2>
-    <form class="setup-form" id="setup-form" autocomplete="off">
+    <form class="setup-form ui-panel" id="setup-form" autocomplete="off">
+      <h2 class="game-title" style="font-size: 1.15rem; margin-bottom: 0.25rem;">Who are you?</h2>
       <label>
         Name prefix (first part of your warrior name)
         <input type="text" id="input-prefix" maxlength="12" placeholder="e.g. Fire, Blue, Leaf" required>
       </label>
       <div>
-        <span style="color:#b8d4b4;font-size:0.95rem;">Fur color</span>
+        <span class="fur-label">Fur color</span>
         <div class="fur-presets" id="fur-presets"></div>
         <input type="hidden" id="input-fur" value="#c9753d">
       </div>
@@ -46,7 +58,7 @@
       <label id="suffix-row" class="hidden">
         Name ending (after your prefix)
         <select id="select-suffix" aria-describedby="suffix-hint"></select>
-        <span id="suffix-hint" style="font-size:0.85rem;color:#8faa8c;margin-top:0.25rem;">For warrior, deputy, medicine cat, queen, elder, daylight warrior, rogue, and loner: pick the second part of your name (example: prefix Sand + storm = Sandstorm).</span>
+        <span id="suffix-hint" class="suffix-hint">For warrior, deputy, medicine cat, queen, elder, daylight warrior, rogue, and loner: pick the second part of your name (example: prefix Sand + storm = Sandstorm).</span>
       </label>
       <button type="submit" class="btn-primary" id="btn-enter">Enter the forest</button>
       <button type="button" class="btn-secondary" id="btn-back-title">Back</button>
@@ -56,23 +68,23 @@
   <canvas id="game-canvas" class="hidden"></canvas>
 
   <div id="screen-kit-mother" class="screen kit-mother-screen hidden" role="dialog" aria-labelledby="kit-mother-title">
-    <svg class="kit-mother-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <!-- Mother (larger) -->
-      <ellipse cx="175" cy="155" rx="72" ry="22" fill="rgba(0,0,0,0.15)"/>
-      <path d="M120 150 Q95 130 88 100 Q85 75 100 58 L108 35 L118 52 Q135 48 155 50 L172 42 L178 28 L188 48 Q210 58 222 78 Q232 105 225 130 Q218 148 200 152 Z" fill="#b8956a" stroke="#7a5c3a" stroke-width="2"/>
-      <path d="M225 115 Q248 95 258 72 Q262 55 248 48" fill="none" stroke="#b8956a" stroke-width="10" stroke-linecap="round"/>
-      <circle cx="138" cy="78" r="7" fill="#8fd4ff"/><circle cx="168" cy="76" r="7" fill="#8fd4ff"/>
-      <circle cx="138" cy="78" r="3.5" fill="#222"/><circle cx="168" cy="76" r="3.5" fill="#222"/>
-      <path d="M148 92 Q153 88 158 92" fill="none" stroke="#5a4030" stroke-width="1.5"/>
-      <!-- Kit (small, snuggled) — fill updated from your fur color in JS -->
-      <path id="kit-intro-body" d="M75 155 Q58 145 52 125 Q50 105 62 92 L68 72 L78 82 Q88 78 98 80 L108 88 L112 72 L118 85 Q128 92 132 105 Q134 118 128 132 Q120 148 102 152 Z" fill="#d4a574" stroke="#9a7048" stroke-width="1.5"/>
-      <circle cx="88" cy="98" r="5" fill="#9ee0ff"/><circle cx="102" cy="96" r="5" fill="#9ee0ff"/>
-      <circle cx="88" cy="98" r="2.5" fill="#111"/><circle cx="102" cy="96" r="2.5" fill="#111"/>
-      <path d="M118 125 Q125 118 132 122" fill="none" stroke="#c9a080" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-    <h2 class="game-title" id="kit-mother-title" style="font-size:1.15rem;">Your mother</h2>
-    <p class="game-sub kit-mother-text">When you’re a kit, the first cat you see is your mother. She’s right here with you.</p>
-    <button type="button" class="btn-primary" id="btn-kit-mother-continue">Look around the camp</button>
+    <div class="ui-panel">
+      <svg class="kit-mother-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="175" cy="155" rx="72" ry="22" fill="rgba(0,0,0,0.15)"/>
+        <path d="M120 150 Q95 130 88 100 Q85 75 100 58 L108 35 L118 52 Q135 48 155 50 L172 42 L178 28 L188 48 Q210 58 222 78 Q232 105 225 130 Q218 148 200 152 Z" fill="#b8956a" stroke="#7a5c3a" stroke-width="2"/>
+        <path d="M225 115 Q248 95 258 72 Q262 55 248 48" fill="none" stroke="#b8956a" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="138" cy="78" r="7" fill="#8fd4ff"/><circle cx="168" cy="76" r="7" fill="#8fd4ff"/>
+        <circle cx="138" cy="78" r="3.5" fill="#222"/><circle cx="168" cy="76" r="3.5" fill="#222"/>
+        <path d="M148 92 Q153 88 158 92" fill="none" stroke="#5a4030" stroke-width="1.5"/>
+        <path id="kit-intro-body" d="M75 155 Q58 145 52 125 Q50 105 62 92 L68 72 L78 82 Q88 78 98 80 L108 88 L112 72 L118 85 Q128 92 132 105 Q134 118 128 132 Q120 148 102 152 Z" fill="#d4a574" stroke="#9a7048" stroke-width="1.5"/>
+        <circle cx="88" cy="98" r="5" fill="#9ee0ff"/><circle cx="102" cy="96" r="5" fill="#9ee0ff"/>
+        <circle cx="88" cy="98" r="2.5" fill="#111"/><circle cx="102" cy="96" r="2.5" fill="#111"/>
+        <path d="M118 125 Q125 118 132 122" fill="none" stroke="#c9a080" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <h2 class="game-title" id="kit-mother-title" style="font-size:1.1rem;">Your mother</h2>
+      <p class="game-sub kit-mother-text">When you’re a kit, the first cat you see is your mother. She’s right here with you.</p>
+      <button type="button" class="btn-primary" id="btn-kit-mother-continue">Look around the camp</button>
+    </div>
   </div>
 
   <div id="hud" class="hidden">
@@ -82,7 +94,7 @@
     </div>
   </div>
 
-  <button type="button" id="btn-menu" class="hidden" aria-label="Menu">Menu</button>
+  <button type="button" id="btn-menu" class="hidden" aria-label="Menu">+ Menu</button>
 
   <div id="touch-look-zone" class="hidden" aria-hidden="true"></div>
   <div id="joystick-zone" class="hidden">
@@ -91,7 +103,7 @@
     </div>
   </div>
 
-  <div id="hint-bar">Tap + drag on the right to look · Move stick to walk</div>
+  <div id="hint-bar">Drag right side to look · Move stick to walk</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/game-logic.js"></script>
