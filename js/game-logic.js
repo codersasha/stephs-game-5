@@ -17,6 +17,8 @@ const GameLogic = {
     'apprentice',
     'warrior',
     'deputy',
+    'medicine cat',
+    'queen',
     'leader',
     'elder',
     'daylight warrior',
@@ -31,6 +33,8 @@ const GameLogic = {
       apprentice: 'Apprentice',
       warrior: 'Warrior',
       deputy: 'Deputy',
+      'medicine cat': 'Medicine cat',
+      queen: 'Queen',
       leader: 'Leader',
       elder: 'Elder',
       'daylight warrior': 'Daylight warrior',
@@ -42,8 +46,8 @@ const GameLogic = {
   },
 
   /**
-   * Suffix options for warrior, deputy, elder (and same style for daylight warrior, rogue, loner).
-   * Full name = prefix + suffix → e.g. Sand + stream → Sandstream
+   * Suffix options for warrior-style names (warrior, deputy, medicine cat, queen, elder, etc.).
+   * Full name = prefix + suffix → e.g. Sand + storm = Sandstorm, Leaf + shine = Leafshine.
    */
   WARRIOR_SUFFIXES: [
     'stream',
@@ -65,11 +69,13 @@ const GameLogic = {
     'nip'
   ],
 
-  /** Roles that pick a suffix from WARRIOR_SUFFIXES */
+  /** Roles that pick a suffix from WARRIOR_SUFFIXES (same as warriors in the books). */
   usesWarriorSuffixRank (rank) {
     return (
       rank === 'warrior' ||
       rank === 'deputy' ||
+      rank === 'medicine cat' ||
+      rank === 'queen' ||
       rank === 'elder' ||
       rank === 'daylight warrior' ||
       rank === 'rogue' ||
@@ -127,7 +133,7 @@ const GameLogic = {
   /**
    * Full name: prefix + rules by role.
    * — Kit: …kit (Sandkit). Apprentice: …paw. Leader: …star.
-   * — Warrior, deputy, elder (etc.): prefix + chosen suffix from WARRIOR_SUFFIXES.
+   * — Warrior, deputy, medicine cat, queen, elder (etc.): prefix + chosen suffix from WARRIOR_SUFFIXES.
    * — Kittypet: prefix only (house-cat style).
    */
   getWarriorName (profile) {

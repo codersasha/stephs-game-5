@@ -47,7 +47,11 @@
       ok('getWarriorName leader', GameLogic.getWarriorName({ ...p, namePrefix: 'Blue', rank: 'leader' }) === 'Bluestar');
       ok('getWarriorName kittypet', GameLogic.getWarriorName({ ...p, namePrefix: 'Rusty', rank: 'kittypet' }) === 'Rusty');
       ok('getWarriorName rogue suffix', GameLogic.getWarriorName({ ...p, namePrefix: 'Dark', rank: 'rogue', nameSuffix: 'claw' }) === 'Darkclaw');
+      ok('getWarriorName medicine cat', GameLogic.getWarriorName({ ...p, namePrefix: 'Leaf', rank: 'medicine cat', nameSuffix: 'shine' }) === 'Leafshine');
+      ok('getWarriorName queen', GameLogic.getWarriorName({ ...p, namePrefix: 'Sorrel', rank: 'queen', nameSuffix: 'tail' }) === 'Sorreltail');
+      ok('usesWarriorSuffix medicine+queen', GameLogic.usesWarriorSuffixRank('medicine cat') && GameLogic.usesWarriorSuffixRank('queen'));
       ok('getRoleLabel loner', GameLogic.getRoleLabel({ ...p, clan: 'Outside the clans', rank: 'loner' }) === 'Loner');
+      ok('getRoleLabel medicine cat', GameLogic.getRoleLabel({ ...p, clan: 'RiverClan', rank: 'medicine cat' }) === 'RiverClan — Medicine cat');
 
       ok('clampHexColor', GameLogic.clampHexColor('#ff00aa') === '#ff00aa');
       ok('clampHexColor bad', GameLogic.clampHexColor('nope') === '#c9753d');
