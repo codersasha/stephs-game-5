@@ -50,6 +50,11 @@
   let isPlaying = false;
   let isMobile = false;
   let audioCtx = null;
+  /** Master gain for all game audio (Web Audio API — no sound files). */
+  let audioBus = null;
+  let footstepCooldown = 0;
+  let birdTimer = 0;
+  let nextBirdIn = 4;
   let saveTimer = null;
   let hintShown = false;
 
@@ -68,38 +73,176 @@
     return isTouchDevice() && window.matchMedia('(max-width: 900px)').matches;
   }
 
+  function setGameAudioLevel (playing) {
+    if (!audioBus) return;
+    const t = audioCtx ? audioCtx.currentTime : 0;
+    try {
+      audioBus.gain.cancelScheduledValues(t);
+      audioBus.gain.setValueAtTime(audioBus.gain.value, t);
+      audioBus.gain.linearRampToValueAtTime(playing ? 0.42 : 0, t + 0.2);
+    } catch (e) {
+      audioBus.gain.value = playing ? 0.42 : 0;
+    }
+  }
+
+  function playUiBlip () {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520, t);
+    o.frequency.exponentialRampToValueAtTime(780, t + 0.06);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.1, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t + 0.11);
+  }
+
+  function playFootstep () {
+    if (!audioCtx || !audioBus) return;
+    const t = audioCtx.currentTime;
+    const len = Math.floor(audioCtx.sampleRate * 0.055);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      const env = Math.pow(1 - i / len, 1.8);
+      data[i] = (Math.random() * 2 - 1) * env * 0.85;
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 260 + Math.random() * 80;
+    bp.Q.value = 0.9;
+    const g = audioCtx.createGain();
+    g.gain.value = isKitRole() ? 0.14 : 0.18;
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(audioBus);
+    src.start(t);
+    src.stop(t + 0.06);
+  }
+
+  function playBirdChirp () {
+    if (!audioCtx || !audioBus) return;
+    const t = audioCtx.currentTime;
+    const base = 2600 + Math.random() * 900;
+    for (let k = 0; k < 2; k++) {
+      const o = audioCtx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(base + k * 180, t + k * 0.04);
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0, t + k * 0.04);
+      g.gain.linearRampToValueAtTime(0.06, t + k * 0.04 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + k * 0.04 + 0.1);
+      o.connect(g);
+      g.connect(audioBus);
+      o.start(t + k * 0.04);
+      o.stop(t + k * 0.04 + 0.12);
+    }
+  }
+
+  function updateWorldSounds (dt, moving) {
+    if (moving) {
+      footstepCooldown -= dt;
+      if (footstepCooldown <= 0) {
+        playFootstep();
+        footstepCooldown = isKitRole() ? 0.2 : 0.26;
+      }
+    } else {
+      footstepCooldown = 0;
+    }
+    birdTimer += dt;
+    if (birdTimer >= nextBirdIn) {
+      birdTimer = 0;
+      nextBirdIn = 5 + Math.random() * 9;
+      if (Math.random() > 0.35) playBirdChirp();
+    }
+  }
+
   function initAudio () {
     if (audioCtx) return;
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const master = audioCtx.createGain();
-      master.gain.value = 0.12;
-      master.connect(audioCtx.destination);
+      audioBus = audioCtx.createGain();
+      audioBus.gain.value = 0;
 
-      const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
-      const d = noiseBuf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = noiseBuf;
-      noise.loop = true;
-      const bp = audioCtx.createBiquadFilter();
-      bp.type = 'lowpass';
-      bp.frequency.value = 420;
-      const g = audioCtx.createGain();
-      g.gain.value = 0.35;
-      noise.connect(bp);
-      bp.connect(g);
-      g.connect(master);
-      noise.start();
+      const comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -20;
+      comp.knee.value = 8;
+      comp.ratio.value = 3;
+      comp.attack.value = 0.003;
+      comp.release.value = 0.12;
+      audioBus.connect(comp);
+      comp.connect(audioCtx.destination);
 
-      const ambientOsc = audioCtx.createOscillator();
-      ambientOsc.type = 'sine';
-      ambientOsc.frequency.value = 58;
-      const og = audioCtx.createGain();
-      og.gain.value = 0.04;
-      ambientOsc.connect(og);
-      og.connect(master);
-      ambientOsc.start();
+      const sr = audioCtx.sampleRate;
+      const noiseBuf = audioCtx.createBuffer(1, sr * 2, sr);
+      const nd = noiseBuf.getChannelData(0);
+      for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+      const wind = audioCtx.createBufferSource();
+      wind.buffer = noiseBuf;
+      wind.loop = true;
+      const windF = audioCtx.createBiquadFilter();
+      windF.type = 'lowpass';
+      windF.frequency.value = 380;
+      const windG = audioCtx.createGain();
+      windG.gain.value = 0.32;
+      wind.connect(windF);
+      windF.connect(windG);
+      windG.connect(audioBus);
+      wind.start();
+
+      const rustleBuf = audioCtx.createBuffer(1, sr * 2, sr);
+      const rd = rustleBuf.getChannelData(0);
+      for (let i = 0; i < rd.length; i++) rd[i] = Math.random() * 2 - 1;
+      const rustle = audioCtx.createBufferSource();
+      rustle.buffer = rustleBuf;
+      rustle.loop = true;
+      const rustleF = audioCtx.createBiquadFilter();
+      rustleF.type = 'bandpass';
+      rustleF.frequency.value = 2200;
+      rustleF.Q.value = 0.4;
+      const rustleG = audioCtx.createGain();
+      rustleG.gain.value = 0.045;
+      rustle.connect(rustleF);
+      rustleF.connect(rustleG);
+      rustleG.connect(audioBus);
+      rustle.start();
+
+      const drone = audioCtx.createOscillator();
+      drone.type = 'sine';
+      drone.frequency.value = 52;
+      const droneG = audioCtx.createGain();
+      droneG.gain.value = 0.06;
+      drone.connect(droneG);
+      droneG.connect(audioBus);
+      drone.start();
+
+      const drone2 = audioCtx.createOscillator();
+      drone2.type = 'sine';
+      drone2.frequency.value = 78;
+      const drone2G = audioCtx.createGain();
+      drone2G.gain.value = 0.035;
+      drone2.connect(drone2G);
+      drone2G.connect(audioBus);
+      drone2.start();
+
+      try {
+        const lfo = audioCtx.createOscillator();
+        lfo.frequency.value = 0.07;
+        const lfoG = audioCtx.createGain();
+        lfoG.gain.value = 60;
+        lfo.connect(lfoG);
+        lfoG.connect(windF.frequency);
+        lfo.start();
+      } catch (lfoErr) {
+        /* wind still works without gust LFO */
+      }
     } catch (err) {
       /* ignore */
     }
@@ -244,6 +387,9 @@
       fwd /= len;
       str /= len;
     }
+
+    const moving = len > 0.02;
+    updateWorldSounds(dt, moving);
 
     const speed = getMoveSpeed() * dt;
     const sin = Math.sin(cameraYaw);
@@ -427,6 +573,7 @@
   function startGame () {
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    setGameAudioLevel(true);
 
     isMobile = detectMobile();
     initThree();
@@ -453,6 +600,7 @@
 
       btnKitMotherContinue.onclick = function onKitContinue () {
         btnKitMotherContinue.onclick = null;
+        playUiBlip();
         kitMotherScreen.classList.add('hidden');
         canvas.classList.remove('hidden');
         hud.classList.remove('hidden');
@@ -471,6 +619,7 @@
 
   function pauseToMenu () {
     isPlaying = false;
+    setGameAudioLevel(false);
     if (saveTimer) {
       clearInterval(saveTimer);
       saveTimer = null;
@@ -557,6 +706,9 @@
     }
 
     btnStart.addEventListener('click', function () {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      playUiBlip();
       profile = GameLogic.loadProfile() || GameLogic.createDefaultProfile();
       fillSetupForm(profile);
       screenTitle.classList.add('hidden');
@@ -564,6 +716,9 @@
     });
 
     btnContinue.addEventListener('click', function () {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      playUiBlip();
       profile = GameLogic.loadProfile();
       if (!profile) return;
       screenTitle.classList.add('hidden');
@@ -592,6 +747,7 @@
       };
       GameLogic.normalizeProfile(profile);
       GameLogic.saveProfile(profile);
+      playUiBlip();
       screenSetup.classList.add('hidden');
       startGame();
     });
@@ -602,6 +758,15 @@
 
     setupPointerLock();
     setupJoystick();
+
+    document.addEventListener('visibilitychange', function () {
+      if (!audioCtx) return;
+      if (document.hidden) {
+        audioCtx.suspend().catch(function () {});
+      } else {
+        audioCtx.resume().catch(function () {});
+      }
+    });
   }
 
   initDom();
