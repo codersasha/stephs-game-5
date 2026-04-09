@@ -1,4 +1,4 @@
-/* Warrior Cats 3D RP — natural, muted UI (no emoji-style decoration; earthy palette) */
+/* Warrior Cats: The Game — natural, muted UI */
 
 :root {
   --ui-bg-deep: #0e0d0b;
@@ -55,11 +55,14 @@ body {
 
 .system-topbar__title {
   font-family: var(--ui-font-display);
-  font-size: 0.78rem;
+  font-size: clamp(0.65rem, 2.8vw, 0.78rem);
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ui-text-dim);
+  text-align: center;
+  max-width: min(100%, 22rem);
+  line-height: 1.25;
 }
 
 .system-topbar::after {
@@ -132,14 +135,17 @@ body {
 
 .game-title {
   font-family: var(--ui-font-display);
-  font-size: clamp(1.25rem, 3.8vw, 1.65rem);
+  font-size: clamp(1.05rem, 3.2vw, 1.5rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: none;
   color: var(--ui-text);
   text-align: center;
   margin: 0 0 0.35rem;
-  line-height: 1.2;
+  line-height: 1.25;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .game-sub {

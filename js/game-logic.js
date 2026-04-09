@@ -1,5 +1,5 @@
 /* ========================================
-   Warrior Cats 3D RP — pure game logic (testable)
+   Warrior Cats: The Game — pure game logic (testable)
    ======================================== */
 
 const GameLogic = {
