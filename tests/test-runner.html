@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warrior Cats 3D RP — tests</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 1rem; background: #111; color: #eee; }
+    .pass { color: #6c6; }
+    .fail { color: #f66; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Game logic tests</h1>
+  <pre id="out"></pre>
+  <script src="../js/game-logic.js"></script>
+  <script>
+    (function () {
+      const out = document.getElementById('out');
+      let passed = 0, failed = 0;
+      const lines = [];
+
+      function ok (name, cond) {
+        if (cond) {
+          passed++;
+          lines.push('<span class="pass">PASS</span> ' + name);
+        } else {
+          failed++;
+          lines.push('<span class="fail">FAIL</span> ' + name);
+        }
+      }
+
+      ok('validateNamePrefix good', GameLogic.validateNamePrefix('Blue'));
+      ok('validateNamePrefix short', !GameLogic.validateNamePrefix('A'));
+      ok('validateNamePrefix bad chars', !GameLogic.validateNamePrefix('Blue2'));
+
+      ok('formatNamePrefix', GameLogic.formatNamePrefix('fire') === 'Fire');
+
+      const p = GameLogic.createDefaultProfile();
+      ok('getWarriorName warrior', GameLogic.getWarriorName({ ...p, namePrefix: 'Fire', rank: 'warrior' }) === 'Fireheart');
+      ok('getWarriorName kit', GameLogic.getWarriorName({ ...p, namePrefix: 'Tiny', rank: 'kit' }) === 'Tinykit');
+      ok('getWarriorName leader', GameLogic.getWarriorName({ ...p, namePrefix: 'Blue', rank: 'leader' }) === 'Bluestar');
+      ok('getWarriorName medicine', GameLogic.getWarriorName({ ...p, namePrefix: 'Leaf', rank: 'medicine cat' }) === 'Leafpool');
+
+      ok('clampHexColor', GameLogic.clampHexColor('#ff00aa') === '#ff00aa');
+      ok('clampHexColor bad', GameLogic.clampHexColor('nope') === '#c9753d');
+
+      lines.push('');
+      lines.push('Done: ' + passed + ' passed, ' + failed + ' failed.');
+      out.innerHTML = lines.join('\n');
+    })();
+  </script>
+</body>
+</html>

@@ -1,1 +1,75 @@
-<!DOCTYPE html><html><head><title>Steph's Game 5</title></head><body><h1>Welcome to Steph's Game 5</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Warrior Cats — Forest RP (3D)</title>
+  <meta name="description" content="A first-person Warrior Cats roleplay. Create your cat and explore the forest.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="screen-title" class="screen">
+    <svg class="title-svg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M60 140 Q40 130 35 110 Q30 90 40 75 Q45 65 50 60 L55 40 L65 55 Q75 50 90 48 Q110 46 125 50 L135 55 L140 38 Q145 55 145 65 Q155 75 160 90 Q165 110 155 130 Q150 140 140 140 Z" fill="#c9753d" stroke="#8b5a2b" stroke-width="2"/>
+      <path d="M155 120 Q175 110 185 90 Q190 75 180 65" fill="none" stroke="#c9753d" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="80" cy="70" r="6" fill="#6ae"/><circle cx="115" cy="70" r="6" fill="#6ae"/>
+      <circle cx="80" cy="70" r="3" fill="#111"/><circle cx="115" cy="70" r="3" fill="#111"/>
+      <path d="M95 82 L100 78 L105 82 Z" fill="#e8a0a8"/>
+    </svg>
+    <h1 class="game-title">Warrior Cats — Forest RP</h1>
+    <p class="game-sub">You’re the cat. Walk the forest in first person — play, don’t rush to “win.”</p>
+    <button type="button" class="btn-primary" id="btn-start">Create your cat</button>
+    <button type="button" class="btn-secondary" id="btn-continue" hidden>Continue last cat</button>
+  </div>
+
+  <div id="screen-setup" class="screen hidden">
+    <h2 class="game-title" style="font-size: 1.2rem;">Who are you?</h2>
+    <form class="setup-form" id="setup-form" autocomplete="off">
+      <label>
+        Name prefix (first part of your warrior name)
+        <input type="text" id="input-prefix" maxlength="12" placeholder="e.g. Fire, Blue, Leaf" required>
+      </label>
+      <div>
+        <span style="color:#b8d4b4;font-size:0.95rem;">Fur color</span>
+        <div class="fur-presets" id="fur-presets"></div>
+        <input type="hidden" id="input-fur" value="#c9753d">
+      </div>
+      <label>
+        Clan
+        <select id="select-clan"></select>
+      </label>
+      <label>
+        Rank
+        <select id="select-rank"></select>
+      </label>
+      <button type="submit" class="btn-primary" id="btn-enter">Enter the forest</button>
+      <button type="button" class="btn-secondary" id="btn-back-title">Back</button>
+    </form>
+  </div>
+
+  <canvas id="game-canvas" class="hidden"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="hud-card">
+      <div class="warrior-name" id="hud-name">—</div>
+      <div id="hud-role">—</div>
+    </div>
+  </div>
+
+  <button type="button" id="btn-menu" class="hidden" aria-label="Menu">Menu</button>
+
+  <div id="touch-look-zone" class="hidden" aria-hidden="true"></div>
+  <div id="joystick-zone" class="hidden">
+    <div id="joystick" aria-hidden="true">
+      <div id="joystick-knob"></div>
+    </div>
+  </div>
+
+  <div id="hint-bar">Tap + drag on the right to look · Move stick to walk</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/game-logic.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
