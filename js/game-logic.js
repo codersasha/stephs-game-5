@@ -3,7 +3,107 @@
    ======================================== */
 
 const GameLogic = {
-  STORAGE_KEY: 'wc3drp_profile_v1',
+  /** Legacy single-save key (migrated into slot 1 once). */
+  LEGACY_STORAGE_KEY: 'wc3drp_profile_v1',
+  STORAGE_SLOT_PREFIX: 'wc3drp_profile_v2_slot_',
+  SAVE_SLOT_COUNT: 3,
+
+  slotKey (slot) {
+    return this.STORAGE_SLOT_PREFIX + String(slot);
+  },
+
+  /** Copy old single save into slot 1 if slot 1 is empty. */
+  migrateLegacyIfNeeded () {
+    try {
+      const legacy = localStorage.getItem(this.LEGACY_STORAGE_KEY);
+      if (!legacy) return;
+      if (localStorage.getItem(this.slotKey(1))) return;
+      localStorage.setItem(this.slotKey(1), legacy);
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
+  /**
+   * @param {number} slot 1–3
+   * @returns {object|null}
+   */
+  loadProfile (slot) {
+    this.migrateLegacyIfNeeded();
+    const s = slot === undefined || slot === null ? 1 : slot;
+    if (s < 1 || s > this.SAVE_SLOT_COUNT) return null;
+    try {
+      const raw = localStorage.getItem(this.slotKey(s));
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      if (!o || typeof o !== 'object') return null;
+      return this._mergeLoadedProfile(o);
+    } catch (e) {
+      return null;
+    }
+  },
+
+  _mergeLoadedProfile (o) {
+    const base = this.createDefaultProfile();
+    const merged = {
+      ...base,
+      ...o,
+      position: {
+        ...base.position,
+        ...(o.position && typeof o.position === 'object' ? o.position : {})
+      }
+    };
+    merged.namePrefix = this.formatNamePrefix(merged.namePrefix || base.namePrefix);
+    merged.furColor = this.clampHexColor(merged.furColor);
+    const legacyClan = { Loner: 'Outside the clans', Kittypet: 'Outside the clans' };
+    if (legacyClan[merged.clan]) merged.clan = legacyClan[merged.clan];
+    if (!this.CLANS.includes(merged.clan)) merged.clan = base.clan;
+    if (!this.RANKS.includes(merged.rank)) merged.rank = base.rank;
+    if (!merged.nameSuffix || !this.validateNameSuffix(merged.nameSuffix)) {
+      merged.nameSuffix = base.nameSuffix;
+    }
+    this.normalizeProfile(merged);
+    return merged;
+  },
+
+  /**
+   * @param {object} profile
+   * @param {number} slot 1–3
+   */
+  saveProfile (profile, slot) {
+    const s = slot === undefined || slot === null ? 1 : slot;
+    if (s < 1 || s > this.SAVE_SLOT_COUNT) return false;
+    try {
+      localStorage.setItem(this.slotKey(s), JSON.stringify(profile));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  deleteSaveSlot (slot) {
+    if (slot < 1 || slot > this.SAVE_SLOT_COUNT) return false;
+    try {
+      localStorage.removeItem(this.slotKey(slot));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
+   * Short lines for the save slot list UI.
+   * @returns {{ empty: boolean, title?: string, detail?: string }}
+   */
+  getSlotSummary (slot) {
+    const p = this.loadProfile(slot);
+    if (!p) return { empty: true };
+    return {
+      empty: false,
+      title: this.getWarriorName(p),
+      detail: this.getRoleLabel(p)
+    };
+  },
 
   /** Five Clans + SkyClan, or outside (loners / kittypets / rogues use this + role) */
   CLANS: ['ThunderClan', 'RiverClan', 'WindClan', 'ShadowClan', 'SkyClan', 'Outside the clans'],
@@ -173,45 +273,6 @@ const GameLogic = {
     return m ? '#' + m[1].toLowerCase() : '#c9753d';
   },
 
-  loadProfile () {
-    try {
-      const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (!raw) return null;
-      const o = JSON.parse(raw);
-      if (!o || typeof o !== 'object') return null;
-      const base = this.createDefaultProfile();
-      const merged = {
-        ...base,
-        ...o,
-        position: {
-          ...base.position,
-          ...(o.position && typeof o.position === 'object' ? o.position : {})
-        }
-      };
-      merged.namePrefix = this.formatNamePrefix(merged.namePrefix || base.namePrefix);
-      merged.furColor = this.clampHexColor(merged.furColor);
-      const legacyClan = { Loner: 'Outside the clans', Kittypet: 'Outside the clans' };
-      if (legacyClan[merged.clan]) merged.clan = legacyClan[merged.clan];
-      if (!this.CLANS.includes(merged.clan)) merged.clan = base.clan;
-      if (!this.RANKS.includes(merged.rank)) merged.rank = base.rank;
-      if (!merged.nameSuffix || !this.validateNameSuffix(merged.nameSuffix)) {
-        merged.nameSuffix = base.nameSuffix;
-      }
-      this.normalizeProfile(merged);
-      return merged;
-    } catch (e) {
-      return null;
-    }
-  },
-
-  saveProfile (profile) {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(profile));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
 };
 
 if (typeof module !== 'undefined' && module.exports) {

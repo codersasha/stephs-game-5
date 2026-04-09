@@ -15,10 +15,12 @@
   const $ = function (id) { return document.getElementById(id); };
 
   const screenTitle = $('screen-title');
+  const screenSaves = $('screen-saves');
   const screenSetup = $('screen-setup');
   const canvas = $('game-canvas');
-  const btnStart = $('btn-start');
-  const btnContinue = $('btn-continue');
+  const btnPlay = $('btn-play');
+  const saveSlotsEl = $('save-slots');
+  const btnBackSaves = $('btn-back-saves');
   const btnBackTitle = $('btn-back-title');
   const setupForm = $('setup-form');
   const inputPrefix = $('input-prefix');
@@ -57,12 +59,14 @@
   let nextBirdIn = 4;
   let saveTimer = null;
   let hintShown = false;
+  /** Active save slot 1–3 (set when picking a slot or continuing). */
+  let activeSaveSlot = 1;
 
   function keyDown (e) { onKey(e, true); }
   function keyUp (e) { onKey(e, false); }
   function onResize () { resize(); }
   function onVis () {
-    if (document.hidden && profile) GameLogic.saveProfile(profile);
+    if (document.hidden && profile) GameLogic.saveProfile(profile, activeSaveSlot);
   }
 
   function isTouchDevice () {
@@ -615,7 +619,7 @@
     tick();
 
     saveTimer = setInterval(function () {
-      if (profile) GameLogic.saveProfile(profile);
+      if (profile) GameLogic.saveProfile(profile, activeSaveSlot);
     }, 4000);
   }
 
@@ -673,7 +677,7 @@
       clearInterval(saveTimer);
       saveTimer = null;
     }
-    if (profile) GameLogic.saveProfile(profile);
+    if (profile) GameLogic.saveProfile(profile, activeSaveSlot);
 
     if (document.pointerLockElement === canvas) document.exitPointerLock();
 
@@ -701,9 +705,76 @@
     joystickZone.classList.add('hidden');
 
     screenSetup.classList.add('hidden');
+    screenSaves.classList.add('hidden');
     screenTitle.classList.remove('hidden');
+  }
 
-    btnContinue.hidden = !GameLogic.loadProfile();
+  function renderSaveSlots () {
+    if (!saveSlotsEl) return;
+    saveSlotsEl.innerHTML = '';
+    for (let slot = 1; slot <= GameLogic.SAVE_SLOT_COUNT; slot++) {
+      const summary = GameLogic.getSlotSummary(slot);
+      const row = document.createElement('div');
+      row.className = 'save-slot-row';
+
+      const main = document.createElement('button');
+      main.type = 'button';
+      main.className = 'btn-save-slot' + (summary.empty ? ' is-empty' : '');
+      main.dataset.slot = String(slot);
+
+      const lab = document.createElement('span');
+      lab.className = 'save-slot-num';
+      lab.textContent = 'Slot ' + slot;
+      main.appendChild(lab);
+
+      if (summary.empty) {
+        const t = document.createElement('span');
+        t.className = 'save-slot-empty-text';
+        t.textContent = 'Empty — tap to create a new cat';
+        main.appendChild(t);
+      } else {
+        const nameEl = document.createElement('span');
+        nameEl.className = 'save-slot-name';
+        nameEl.textContent = summary.title;
+        main.appendChild(nameEl);
+        const det = document.createElement('span');
+        det.className = 'save-slot-detail';
+        det.textContent = summary.detail || '';
+        main.appendChild(det);
+      }
+
+      row.appendChild(main);
+
+      if (!summary.empty) {
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'save-slot-delete';
+        del.dataset.slot = String(slot);
+        del.setAttribute('aria-label', 'Delete save in slot ' + slot);
+        del.textContent = 'Delete';
+        row.appendChild(del);
+      }
+
+      saveSlotsEl.appendChild(row);
+    }
+  }
+
+  function selectSaveSlot (slot) {
+    activeSaveSlot = slot;
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    playUiBlip();
+    const existing = GameLogic.loadProfile(slot);
+    if (existing) {
+      profile = existing;
+      screenSaves.classList.add('hidden');
+      startGame();
+    } else {
+      profile = GameLogic.createDefaultProfile();
+      fillSetupForm(profile);
+      screenSaves.classList.add('hidden');
+      screenSetup.classList.remove('hidden');
+    }
   }
 
   function initDom () {
@@ -750,33 +821,42 @@
     const firstSwatch = furPresetsEl.querySelector('.fur-swatch');
     if (firstSwatch) firstSwatch.classList.add('selected');
 
-    if (GameLogic.loadProfile()) {
-      btnContinue.hidden = false;
-    }
-
-    btnStart.addEventListener('click', function () {
+    btnPlay.addEventListener('click', function () {
       initAudio();
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       playUiBlip();
-      profile = GameLogic.loadProfile() || GameLogic.createDefaultProfile();
-      fillSetupForm(profile);
       screenTitle.classList.add('hidden');
-      screenSetup.classList.remove('hidden');
+      screenSaves.classList.remove('hidden');
+      renderSaveSlots();
     });
 
-    btnContinue.addEventListener('click', function () {
-      initAudio();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    btnBackSaves.addEventListener('click', function () {
       playUiBlip();
-      profile = GameLogic.loadProfile();
-      if (!profile) return;
-      screenTitle.classList.add('hidden');
-      startGame();
+      screenSaves.classList.add('hidden');
+      screenTitle.classList.remove('hidden');
+    });
+
+    saveSlotsEl.addEventListener('click', function (e) {
+      const delBtn = e.target.closest('.save-slot-delete');
+      if (delBtn) {
+        e.preventDefault();
+        const slot = parseInt(delBtn.dataset.slot, 10);
+        if (window.confirm('Delete this save? This cannot be undone.')) {
+          GameLogic.deleteSaveSlot(slot);
+          renderSaveSlots();
+        }
+        return;
+      }
+      const mainBtn = e.target.closest('.btn-save-slot');
+      if (mainBtn) {
+        selectSaveSlot(parseInt(mainBtn.dataset.slot, 10));
+      }
     });
 
     btnBackTitle.addEventListener('click', function () {
       screenSetup.classList.add('hidden');
-      screenTitle.classList.remove('hidden');
+      screenSaves.classList.remove('hidden');
+      renderSaveSlots();
     });
 
     setupForm.addEventListener('submit', function (e) {
@@ -795,7 +875,7 @@
         position: profile && profile.position ? profile.position : { x: 0, z: 10, yaw: 0 }
       };
       GameLogic.normalizeProfile(profile);
-      GameLogic.saveProfile(profile);
+      GameLogic.saveProfile(profile, activeSaveSlot);
       playUiBlip();
       screenSetup.classList.add('hidden');
       startGame();

@@ -56,6 +56,17 @@
       ok('clampHexColor', GameLogic.clampHexColor('#ff00aa') === '#ff00aa');
       ok('clampHexColor bad', GameLogic.clampHexColor('nope') === '#c9753d');
 
+      try {
+        const testP = GameLogic.createDefaultProfile();
+        testP.namePrefix = 'Slotb';
+        GameLogic.saveProfile(testP, 2);
+        ok('save/load slot 2', GameLogic.loadProfile(2).namePrefix === 'Slotb');
+        GameLogic.deleteSaveSlot(2);
+        ok('delete slot 2 empty', GameLogic.loadProfile(2) === null);
+      } catch (se) {
+        ok('save slots (localStorage)', false);
+      }
+
       lines.push('');
       lines.push('Done: ' + passed + ' passed, ' + failed + ' failed.');
       out.innerHTML = lines.join('\n');
