@@ -21,6 +21,8 @@
   const furPresetsEl = $('fur-presets');
   const selectClan = $('select-clan');
   const selectRank = $('select-rank');
+  const selectSuffix = $('select-suffix');
+  const suffixRow = $('suffix-row');
   const hud = $('hud');
   const hudName = $('hud-name');
   const hudRole = $('hud-role');
@@ -334,6 +336,19 @@
     }, { passive: false });
   }
 
+  function formatSuffixLabel (s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function updateSuffixRow () {
+    const rank = selectRank.value;
+    const show = GameLogic.usesWarriorSuffixRank(rank);
+    suffixRow.classList.toggle('hidden', !show);
+    if (show && selectSuffix.value && !GameLogic.validateNameSuffix(selectSuffix.value)) {
+      selectSuffix.value = 'heart';
+    }
+  }
+
   function fillSetupForm (p) {
     inputPrefix.value = p.namePrefix || '';
     inputFur.value = GameLogic.clampHexColor(p.furColor);
@@ -342,6 +357,9 @@
     });
     selectClan.value = p.clan || 'ThunderClan';
     selectRank.value = p.rank || 'warrior';
+    const suf = p.nameSuffix && GameLogic.validateNameSuffix(p.nameSuffix) ? p.nameSuffix : 'heart';
+    selectSuffix.value = suf;
+    updateSuffixRow();
   }
 
   function startGame () {
@@ -440,6 +458,15 @@
       selectRank.appendChild(opt);
     });
 
+    GameLogic.WARRIOR_SUFFIXES.forEach(function (s) {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = formatSuffixLabel(s);
+      selectSuffix.appendChild(opt);
+    });
+
+    selectRank.addEventListener('change', updateSuffixRow);
+
     GameLogic.FUR_PRESETS.forEach(function (hex) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -496,8 +523,10 @@
         furColor: GameLogic.clampHexColor(inputFur.value),
         clan: selectClan.value,
         rank: selectRank.value,
+        nameSuffix: selectSuffix.value,
         position: profile && profile.position ? profile.position : { x: 0, z: 10, yaw: 0 }
       };
+      GameLogic.normalizeProfile(profile);
       GameLogic.saveProfile(profile);
       screenSetup.classList.add('hidden');
       startGame();

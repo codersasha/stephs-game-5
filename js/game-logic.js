@@ -41,11 +41,63 @@ const GameLogic = {
     return labels[rank] || rank;
   },
 
+  /**
+   * Suffix options for warrior, deputy, elder (and same style for daylight warrior, rogue, loner).
+   * Full name = prefix + suffix → e.g. Sand + stream → Sandstream
+   */
+  WARRIOR_SUFFIXES: [
+    'stream',
+    'flower',
+    'foot',
+    'step',
+    'fur',
+    'heart',
+    'claw',
+    'pelt',
+    'leaf',
+    'shine',
+    'blaze',
+    'storm',
+    'stripe',
+    'tail',
+    'pine',
+    'song',
+    'nip'
+  ],
+
+  /** Roles that pick a suffix from WARRIOR_SUFFIXES */
+  usesWarriorSuffixRank (rank) {
+    return (
+      rank === 'warrior' ||
+      rank === 'deputy' ||
+      rank === 'elder' ||
+      rank === 'daylight warrior' ||
+      rank === 'rogue' ||
+      rank === 'loner'
+    );
+  },
+
+  validateNameSuffix (suffix) {
+    return typeof suffix === 'string' && this.WARRIOR_SUFFIXES.indexOf(suffix) !== -1;
+  },
+
+  /**
+   * Ensures nameSuffix is valid when the role uses the warrior suffix list.
+   */
+  normalizeProfile (profile) {
+    const rank = profile.rank || 'warrior';
+    if (this.usesWarriorSuffixRank(rank)) {
+      const s = profile.nameSuffix;
+      profile.nameSuffix = this.validateNameSuffix(s) ? s : 'heart';
+    }
+    return profile;
+  },
+
   /** Default fur presets (hex) — kids pick quickly */
   FUR_PRESETS: ['#c9753d', '#2a2a2a', '#f0e6d2', '#6b5344', '#d4a574', '#8b4513', '#4a6fa5', '#e8e8e8'],
 
   /**
-   * @returns {{ namePrefix: string, furColor: string, clan: string, rank: string, position: {x:number,z:number,yaw:number} }}
+   * @returns {{ namePrefix: string, furColor: string, clan: string, rank: string, nameSuffix?: string, position: {x:number,z:number,yaw:number} }}
    */
   createDefaultProfile () {
     return {
@@ -53,6 +105,7 @@ const GameLogic = {
       furColor: '#c9753d',
       clan: 'ThunderClan',
       rank: 'warrior',
+      nameSuffix: 'heart',
       position: { x: 0, z: 8, yaw: 0 }
     };
   },
@@ -72,26 +125,24 @@ const GameLogic = {
   },
 
   /**
-   * Warrior-style display name from prefix + role (simplified suffix rules).
-   * Kittypet uses a one-part name (prefix only), like a house cat name.
+   * Full name: prefix + rules by role.
+   * — Kit: …kit (Sandkit). Apprentice: …paw. Leader: …star.
+   * — Warrior, deputy, elder (etc.): prefix + chosen suffix from WARRIOR_SUFFIXES.
+   * — Kittypet: prefix only (house-cat style).
    */
   getWarriorName (profile) {
     const p = this.formatNamePrefix(profile.namePrefix || '');
     if (!p) return 'Unnamed';
     const rank = profile.rank || 'warrior';
     if (rank === 'kittypet') return p;
-    const suffix = {
-      kit: 'kit',
-      apprentice: 'paw',
-      warrior: 'heart',
-      deputy: 'heart',
-      leader: 'star',
-      elder: 'tail',
-      'daylight warrior': 'heart',
-      rogue: 'claw',
-      loner: 'foot'
-    }[rank] || 'heart';
-    return p + suffix;
+    if (rank === 'kit') return p + 'kit';
+    if (rank === 'apprentice') return p + 'paw';
+    if (rank === 'leader') return p + 'star';
+    if (this.usesWarriorSuffixRank(rank)) {
+      const suf = this.validateNameSuffix(profile.nameSuffix) ? profile.nameSuffix : 'heart';
+      return p + suf;
+    }
+    return p + 'heart';
   },
 
   /**
@@ -137,6 +188,10 @@ const GameLogic = {
       if (legacyClan[merged.clan]) merged.clan = legacyClan[merged.clan];
       if (!this.CLANS.includes(merged.clan)) merged.clan = base.clan;
       if (!this.RANKS.includes(merged.rank)) merged.rank = base.rank;
+      if (!merged.nameSuffix || !this.validateNameSuffix(merged.nameSuffix)) {
+        merged.nameSuffix = base.nameSuffix;
+      }
+      this.normalizeProfile(merged);
       return merged;
     } catch (e) {
       return null;

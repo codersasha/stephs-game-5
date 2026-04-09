@@ -38,12 +38,15 @@
       ok('formatNamePrefix', GameLogic.formatNamePrefix('fire') === 'Fire');
 
       const p = GameLogic.createDefaultProfile();
-      ok('getWarriorName warrior', GameLogic.getWarriorName({ ...p, namePrefix: 'Fire', rank: 'warrior' }) === 'Fireheart');
-      ok('getWarriorName kit', GameLogic.getWarriorName({ ...p, namePrefix: 'Tiny', rank: 'kit' }) === 'Tinykit');
+      ok('getWarriorName warrior default suffix', GameLogic.getWarriorName({ ...p, namePrefix: 'Fire', rank: 'warrior', nameSuffix: 'heart' }) === 'Fireheart');
+      ok('getWarriorName warrior custom', GameLogic.getWarriorName({ ...p, namePrefix: 'Sand', rank: 'warrior', nameSuffix: 'storm' }) === 'Sandstorm');
+      ok('getWarriorName deputy', GameLogic.getWarriorName({ ...p, namePrefix: 'Gray', rank: 'deputy', nameSuffix: 'stripe' }) === 'Graystripe');
+      ok('getWarriorName elder', GameLogic.getWarriorName({ ...p, namePrefix: 'Hal', rank: 'elder', nameSuffix: 'tail' }) === 'Haltail');
+      ok('getWarriorName kit', GameLogic.getWarriorName({ ...p, namePrefix: 'Sand', rank: 'kit' }) === 'Sandkit');
+      ok('getWarriorName apprentice', GameLogic.getWarriorName({ ...p, namePrefix: 'Sand', rank: 'apprentice' }) === 'Sandpaw');
       ok('getWarriorName leader', GameLogic.getWarriorName({ ...p, namePrefix: 'Blue', rank: 'leader' }) === 'Bluestar');
-      ok('getWarriorName elder', GameLogic.getWarriorName({ ...p, namePrefix: 'Long', rank: 'elder' }) === 'Longtail');
       ok('getWarriorName kittypet', GameLogic.getWarriorName({ ...p, namePrefix: 'Rusty', rank: 'kittypet' }) === 'Rusty');
-      ok('getWarriorName rogue', GameLogic.getWarriorName({ ...p, namePrefix: 'Dark', rank: 'rogue' }) === 'Darkclaw');
+      ok('getWarriorName rogue suffix', GameLogic.getWarriorName({ ...p, namePrefix: 'Dark', rank: 'rogue', nameSuffix: 'claw' }) === 'Darkclaw');
       ok('getRoleLabel loner', GameLogic.getRoleLabel({ ...p, clan: 'Outside the clans', rank: 'loner' }) === 'Loner');
 
       ok('clampHexColor', GameLogic.clampHexColor('#ff00aa') === '#ff00aa');
