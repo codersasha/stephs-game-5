@@ -436,7 +436,7 @@
     GameLogic.RANKS.forEach(function (r) {
       const opt = document.createElement('option');
       opt.value = r;
-      opt.textContent = r.replace(/\b\w/g, function (x) { return x.toUpperCase(); });
+      opt.textContent = GameLogic.getRoleDisplayName(r);
       selectRank.appendChild(opt);
     });
 

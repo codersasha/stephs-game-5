@@ -5,9 +5,41 @@
 const GameLogic = {
   STORAGE_KEY: 'wc3drp_profile_v1',
 
-  CLANS: ['ThunderClan', 'RiverClan', 'WindClan', 'ShadowClan', 'SkyClan', 'Loner', 'Kittypet'],
+  /** Five Clans + SkyClan, or outside (loners / kittypets / rogues use this + role) */
+  CLANS: ['ThunderClan', 'RiverClan', 'WindClan', 'ShadowClan', 'SkyClan', 'Outside the clans'],
 
-  RANKS: ['kit', 'apprentice', 'warrior', 'medicine cat', 'deputy', 'leader'],
+  /**
+   * Role (rank) — what you are in the world.
+   * Stored in profile.rank for save compatibility.
+   */
+  RANKS: [
+    'kit',
+    'apprentice',
+    'warrior',
+    'deputy',
+    'leader',
+    'elder',
+    'daylight warrior',
+    'rogue',
+    'loner',
+    'kittypet'
+  ],
+
+  getRoleDisplayName (rank) {
+    const labels = {
+      kit: 'Kit',
+      apprentice: 'Apprentice',
+      warrior: 'Warrior',
+      deputy: 'Deputy',
+      leader: 'Leader',
+      elder: 'Elder',
+      'daylight warrior': 'Daylight warrior',
+      rogue: 'Rogue',
+      loner: 'Loner',
+      kittypet: 'Kittypet'
+    };
+    return labels[rank] || rank;
+  },
 
   /** Default fur presets (hex) — kids pick quickly */
   FUR_PRESETS: ['#c9753d', '#2a2a2a', '#f0e6d2', '#6b5344', '#d4a574', '#8b4513', '#4a6fa5', '#e8e8e8'],
@@ -40,33 +72,42 @@ const GameLogic = {
   },
 
   /**
-   * Warrior-style display name from prefix + rank (simplified suffix rules).
+   * Warrior-style display name from prefix + role (simplified suffix rules).
+   * Kittypet uses a one-part name (prefix only), like a house cat name.
    */
   getWarriorName (profile) {
     const p = this.formatNamePrefix(profile.namePrefix || '');
     if (!p) return 'Unnamed';
     const rank = profile.rank || 'warrior';
+    if (rank === 'kittypet') return p;
     const suffix = {
       kit: 'kit',
       apprentice: 'paw',
       warrior: 'heart',
-      'medicine cat': 'pool',
       deputy: 'heart',
-      leader: 'star'
+      leader: 'star',
+      elder: 'tail',
+      'daylight warrior': 'heart',
+      rogue: 'claw',
+      loner: 'foot'
     }[rank] || 'heart';
     return p + suffix;
   },
 
   /**
-   * Short label for HUD, e.g. "ThunderClan warrior"
+   * Short label for HUD (clan + role, or role alone for loner / rogue / kittypet).
    */
   getRoleLabel (profile) {
-    const clan = profile.clan || 'Loner';
+    const clan = profile.clan || 'Outside the clans';
     const rank = profile.rank || 'warrior';
-    if (rank === 'deputy') return clan + ' — Deputy';
-    if (rank === 'leader') return clan + ' — Leader';
-    if (rank === 'medicine cat') return clan + ' — Medicine Cat';
-    return clan + ' — ' + rank;
+    const roleNice = this.getRoleDisplayName(rank);
+    if (rank === 'loner' || rank === 'rogue' || rank === 'kittypet') {
+      return roleNice;
+    }
+    if (clan === 'Outside the clans') {
+      return roleNice + ' · outside the clans';
+    }
+    return clan + ' — ' + roleNice;
   },
 
   clampHexColor (hex) {
@@ -92,6 +133,8 @@ const GameLogic = {
       };
       merged.namePrefix = this.formatNamePrefix(merged.namePrefix || base.namePrefix);
       merged.furColor = this.clampHexColor(merged.furColor);
+      const legacyClan = { Loner: 'Outside the clans', Kittypet: 'Outside the clans' };
+      if (legacyClan[merged.clan]) merged.clan = legacyClan[merged.clan];
       if (!this.CLANS.includes(merged.clan)) merged.clan = base.clan;
       if (!this.RANKS.includes(merged.rank)) merged.rank = base.rank;
       return merged;

@@ -41,7 +41,10 @@
       ok('getWarriorName warrior', GameLogic.getWarriorName({ ...p, namePrefix: 'Fire', rank: 'warrior' }) === 'Fireheart');
       ok('getWarriorName kit', GameLogic.getWarriorName({ ...p, namePrefix: 'Tiny', rank: 'kit' }) === 'Tinykit');
       ok('getWarriorName leader', GameLogic.getWarriorName({ ...p, namePrefix: 'Blue', rank: 'leader' }) === 'Bluestar');
-      ok('getWarriorName medicine', GameLogic.getWarriorName({ ...p, namePrefix: 'Leaf', rank: 'medicine cat' }) === 'Leafpool');
+      ok('getWarriorName elder', GameLogic.getWarriorName({ ...p, namePrefix: 'Long', rank: 'elder' }) === 'Longtail');
+      ok('getWarriorName kittypet', GameLogic.getWarriorName({ ...p, namePrefix: 'Rusty', rank: 'kittypet' }) === 'Rusty');
+      ok('getWarriorName rogue', GameLogic.getWarriorName({ ...p, namePrefix: 'Dark', rank: 'rogue' }) === 'Darkclaw');
+      ok('getRoleLabel loner', GameLogic.getRoleLabel({ ...p, clan: 'Outside the clans', rank: 'loner' }) === 'Loner');
 
       ok('clampHexColor', GameLogic.clampHexColor('#ff00aa') === '#ff00aa');
       ok('clampHexColor bad', GameLogic.clampHexColor('nope') === '#c9753d');
