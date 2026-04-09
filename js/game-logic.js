@@ -47,7 +47,7 @@ const GameLogic = {
 
   /**
    * Suffix options for warrior-style names (warrior, deputy, medicine cat, queen, elder, etc.).
-   * Full name = prefix + suffix → e.g. Sand + storm = Sandstorm, Leaf + shine = Leafshine.
+   * Full name = prefix + suffix (e.g. Sand + storm = Sandstorm, Leaf + shine = Leafshine).
    */
   WARRIOR_SUFFIXES: [
     'stream',

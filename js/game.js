@@ -250,16 +250,39 @@
 
   function makeTree (furHue) {
     const g = new THREE.Group();
-    const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5c4033 });
-    const leafMat = new THREE.MeshLambertMaterial({ color: new THREE.Color().setHSL(furHue, 0.35, 0.32) });
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 2.2, 7), trunkMat);
-    trunk.position.y = 1.1;
+    const trunkBrown = new THREE.Color().setHSL(0.07 + Math.random() * 0.04, 0.35, 0.28);
+    const trunkMat = new THREE.MeshStandardMaterial({
+      color: trunkBrown,
+      roughness: 0.92,
+      metalness: 0,
+      flatShading: false
+    });
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.36, 2.35, 9), trunkMat);
+    trunk.position.y = 1.15;
     trunk.castShadow = true;
+    trunk.receiveShadow = true;
     g.add(trunk);
-    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3.2, 8), leafMat);
-    leaves.position.y = 3.2;
+    const leafHue = (furHue + Math.random() * 0.06) % 1;
+    const leafCol = new THREE.Color().setHSL(leafHue, 0.22 + Math.random() * 0.18, 0.26 + Math.random() * 0.08);
+    const leafMat = new THREE.MeshStandardMaterial({
+      color: leafCol,
+      roughness: 0.78,
+      metalness: 0,
+      flatShading: false
+    });
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.45, 3.1, 10), leafMat);
+    leaves.position.y = 3.05;
     leaves.castShadow = true;
     g.add(leaves);
+    const leafCol2 = leafCol.clone().multiplyScalar(0.92);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(0.95, 1.8, 8), new THREE.MeshStandardMaterial({
+      color: leafCol2,
+      roughness: 0.82,
+      metalness: 0
+    }));
+    top.position.y = 4.35;
+    top.castShadow = true;
+    g.add(top);
     return g;
   }
 
@@ -267,30 +290,52 @@
     const w = window.innerWidth;
     const h = window.innerHeight;
     scene = new THREE.Scene();
-    const sky = 0x87b8d8;
-    scene.background = new THREE.Color(sky);
-    scene.fog = new THREE.Fog(0xa8c8b8, 25, 130);
+    const skyColor = 0xaabdc4;
+    scene.background = new THREE.Color(skyColor);
+    scene.fog = new THREE.Fog(0xb9c8ce, 35, 145);
 
     camera = new THREE.PerspectiveCamera(FOV_ADULT, w / h, 0.08, 220);
 
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (renderer.outputEncoding !== undefined) {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
+    renderer.physicallyCorrectLights = true;
+    renderer.toneMapping =
+      THREE.ACESFilmicToneMapping !== undefined
+        ? THREE.ACESFilmicToneMapping
+        : THREE.LinearToneMapping;
+    renderer.toneMappingExposure = 1.05;
 
-    const hemi = new THREE.HemisphereLight(0xc8e8ff, 0x3a5c38, 0.92);
+    const hemi = new THREE.HemisphereLight(0xc5d4e0, 0x2a3528, 0.42);
     scene.add(hemi);
-    const sun = new THREE.DirectionalLight(0xfff5e0, 0.85);
-    sun.position.set(40, 70, 20);
+    const fill = new THREE.AmbientLight(0x8a9a88, 0.18);
+    scene.add(fill);
+    const sun = new THREE.DirectionalLight(0xfff2e0, 1.05);
+    sun.position.set(55, 78, 28);
     sun.castShadow = true;
-    sun.shadow.mapSize.width = 1024;
-    sun.shadow.mapSize.height = 1024;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 220;
+    const sh = 95;
+    sun.shadow.camera.left = -sh;
+    sun.shadow.camera.right = sh;
+    sun.shadow.camera.top = sh;
+    sun.shadow.camera.bottom = -sh;
+    sun.shadow.bias = -0.00025;
     scene.add(sun);
 
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(WORLD_HALF * 2.2, WORLD_HALF * 2.2),
-      new THREE.MeshLambertMaterial({ color: 0x3d6b45 })
-    );
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x2a3d2c,
+      roughness: 0.98,
+      metalness: 0
+    });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(WORLD_HALF * 2.2, WORLD_HALF * 2.2), groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
@@ -311,7 +356,11 @@
       scene.add(t);
     }
 
-    const rockMat = new THREE.MeshLambertMaterial({ color: 0x6a6a72 });
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: 0x5a5a5e,
+      roughness: 0.94,
+      metalness: 0.05
+    });
     for (let i = 0; i < 18; i++) {
       const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.4 + Math.random() * 0.5, 0), rockMat);
       const rx = (Math.random() - 0.5) * WORLD_HALF * 1.6;

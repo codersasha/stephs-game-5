@@ -1,22 +1,20 @@
-/* Warrior Cats 3D RP — console-style UI (Switch-inspired: bold tiles, red A‑actions, Joy‑Con accents) */
+/* Warrior Cats 3D RP — natural, muted UI (no emoji-style decoration; earthy palette) */
 
 :root {
-  --ns-bg-deep: #0a0a0b;
-  --ns-bg-screen: #121214;
-  --ns-panel: #252528;
-  --ns-panel-edge: #3a3a40;
-  --ns-text: #f7f7f8;
-  --ns-text-dim: #a8a8b0;
-  --ns-red: #e60012;
-  --ns-red-deep: #b3000e;
-  --ns-blue: #00b4d8;
-  --ns-joy-blue: #00c3e3;
-  --ns-joy-red: #ff6b81;
-  --ns-focus: #00a4e0;
-  --ns-radius: 18px;
-  --ns-radius-btn: 14px;
-  --ns-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
-  --ns-font: "Nunito", system-ui, sans-serif;
+  --ui-bg-deep: #0e0d0b;
+  --ui-bg-screen: #151412;
+  --ui-panel: #1f1d19;
+  --ui-panel-edge: #3a3630;
+  --ui-text: #ebe8e2;
+  --ui-text-dim: #9a958c;
+  --ui-accent: #4d6b52;
+  --ui-accent-deep: #2f4033;
+  --ui-focus: #6d8f72;
+  --ui-radius: 16px;
+  --ui-radius-btn: 12px;
+  --ui-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  --ui-font: "Source Sans 3", system-ui, sans-serif;
+  --ui-font-display: "Source Serif 4", Georgia, serif;
 }
 
 *,
@@ -30,14 +28,13 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  font-family: var(--ns-font);
-  background: var(--ns-bg-deep);
-  color: var(--ns-text);
+  font-family: var(--ui-font);
+  background: var(--ui-bg-deep);
+  color: var(--ui-text);
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Fake “system” top bar — handheld / docked feel */
 .system-topbar {
   position: fixed;
   top: 0;
@@ -45,38 +42,31 @@ body {
   right: 0;
   z-index: 9;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   min-height: 44px;
   padding: env(safe-area-inset-top, 0) 1rem 0;
-  background: linear-gradient(180deg, #1c1c1f 0%, #141416 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, #1a1815 0%, #121110 100%);
+  border-bottom: 1px solid rgba(90, 85, 75, 0.35);
   pointer-events: none;
 }
 
 .system-topbar__title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-family: var(--ui-font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ns-text-dim);
+  color: var(--ui-text-dim);
 }
 
-.joy-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.joy-dot--blue {
-  background: var(--ns-joy-blue);
-  box-shadow: 0 0 10px rgba(0, 195, 227, 0.5);
-}
-
-.joy-dot--red {
-  background: var(--ns-joy-red);
-  box-shadow: 0 0 10px rgba(255, 107, 129, 0.45);
+.system-topbar::after {
+  content: "";
+  width: min(120px, 40vw);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(120, 130, 115, 0.45), transparent);
 }
 
 #game-canvas {
@@ -100,7 +90,7 @@ body {
   justify-content: center;
   padding: calc(44px + env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right))
     max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-  background: radial-gradient(ellipse 120% 80% at 50% 0%, #1e1e24 0%, var(--ns-bg-screen) 45%, var(--ns-bg-deep) 100%);
+  background: radial-gradient(ellipse 120% 90% at 50% -10%, #222019 0%, var(--ui-bg-screen) 50%, var(--ui-bg-deep) 100%);
   overflow-y: auto;
 }
 
@@ -111,15 +101,15 @@ body {
 .ui-panel {
   width: min(100%, 400px);
   padding: clamp(1.25rem, 4vw, 1.75rem);
-  border-radius: var(--ns-radius);
-  background: var(--ns-panel);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--ns-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel);
+  border: 1px solid rgba(100, 95, 85, 0.35);
+  box-shadow: var(--ui-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .kit-mother-screen {
   z-index: 18;
-  background: radial-gradient(ellipse 100% 60% at 50% 20%, #2a2420 0%, #121214 55%, #0a0a0b 100%);
+  background: radial-gradient(ellipse 100% 70% at 50% 15%, #252220 0%, #141210 55%, #0a0908 100%);
 }
 
 .kit-mother-svg {
@@ -141,11 +131,12 @@ body {
 }
 
 .game-title {
+  font-family: var(--ui-font-display);
   font-size: clamp(1.25rem, 3.8vw, 1.65rem);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ns-text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ui-text);
   text-align: center;
   margin: 0 0 0.35rem;
   line-height: 1.2;
@@ -153,42 +144,41 @@ body {
 
 .game-sub {
   font-size: clamp(0.92rem, 2.8vw, 1.05rem);
-  font-weight: 600;
-  color: var(--ns-text-dim);
+  font-weight: 500;
+  color: var(--ui-text-dim);
   text-align: center;
   max-width: 22rem;
   margin: 0 auto 1.35rem;
   line-height: 1.45;
 }
 
-/* Primary = “A” / OK — Nintendo red */
 .btn-primary {
   min-width: 240px;
   min-height: 54px;
   padding: 0.9rem 1.5rem;
-  font-family: var(--ns-font);
-  font-size: 1.08rem;
-  font-weight: 800;
+  font-family: var(--ui-font);
+  font-size: 1.05rem;
+  font-weight: 600;
   border: none;
-  border-radius: var(--ns-radius-btn);
-  background: linear-gradient(180deg, #ff1a2e 0%, var(--ns-red) 45%, var(--ns-red-deep) 100%);
-  color: #fff;
-  box-shadow: 0 4px 0 #7a0009, 0 8px 24px rgba(230, 0, 18, 0.35);
+  border-radius: var(--ui-radius-btn);
+  background: linear-gradient(180deg, #4a6349 0%, var(--ui-accent) 40%, var(--ui-accent-deep) 100%);
+  color: #f4f3f0;
+  box-shadow: 0 3px 0 #1a241c, 0 8px 22px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.08s ease, filter 0.15s ease;
 }
 
 .btn-primary:hover {
-  filter: brightness(1.06);
+  filter: brightness(1.05);
 }
 
 .btn-primary:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 #7a0009, 0 4px 16px rgba(230, 0, 18, 0.3);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1a241c, 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:focus-visible {
-  outline: 3px solid var(--ns-focus);
+  outline: 3px solid var(--ui-focus);
   outline-offset: 3px;
 }
 
@@ -196,13 +186,13 @@ body {
   min-height: 50px;
   margin-top: 0.65rem;
   padding: 0.65rem 1.25rem;
-  font-family: var(--ns-font);
+  font-family: var(--ui-font);
   font-size: 1rem;
-  font-weight: 700;
-  border-radius: var(--ns-radius-btn);
-  border: 2px solid var(--ns-panel-edge);
+  font-weight: 600;
+  border-radius: var(--ui-radius-btn);
+  border: 2px solid var(--ui-panel-edge);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--ns-text);
+  color: var(--ui-text);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -213,7 +203,7 @@ body {
 }
 
 .btn-secondary:focus-visible {
-  outline: 3px solid var(--ns-focus);
+  outline: 3px solid var(--ui-focus);
   outline-offset: 2px;
 }
 
@@ -230,33 +220,33 @@ body {
   gap: 0.4rem;
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--ns-text-dim);
+  color: var(--ui-text-dim);
 }
 
 .setup-form input[type="text"],
 .setup-form select {
   min-height: 50px;
   padding: 0.5rem 0.85rem;
-  font-family: var(--ns-font);
+  font-family: var(--ui-font);
   font-size: 1.02rem;
   font-weight: 600;
   border-radius: 12px;
-  border: 2px solid var(--ns-panel-edge);
-  background: #1a1a1e;
-  color: var(--ns-text);
+  border: 2px solid var(--ui-panel-edge);
+  background: #121110;
+  color: var(--ui-text);
 }
 
 .setup-form input[type="text"]:focus,
 .setup-form select:focus {
-  border-color: var(--ns-joy-blue);
+  border-color: var(--ui-focus);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.25);
+  box-shadow: 0 0 0 3px rgba(109, 143, 114, 0.22);
 }
 
 .fur-label {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--ns-text-dim);
+  color: var(--ui-text-dim);
 }
 
 .fur-presets {
@@ -280,14 +270,14 @@ body {
 }
 
 .fur-swatch.selected {
-  border-color: #fff;
-  box-shadow: 0 0 0 3px var(--ns-joy-blue);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px var(--ui-focus);
 }
 
 .suffix-hint {
   font-size: 0.84rem;
   font-weight: 600;
-  color: var(--ns-text-dim);
+  color: var(--ui-text-dim);
   margin-top: 0.3rem;
   line-height: 1.35;
 }
@@ -304,25 +294,25 @@ body {
 #hud .hud-card {
   display: inline-block;
   padding: 0.55rem 0.9rem 0.55rem 0.85rem;
-  border-radius: 14px;
-  background: rgba(18, 18, 22, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 4px solid var(--ns-joy-blue);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border-radius: 12px;
+  background: rgba(16, 15, 13, 0.88);
+  border: 1px solid rgba(95, 90, 80, 0.45);
+  border-left: 3px solid var(--ui-accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   font-size: clamp(0.8rem, 2.8vw, 0.95rem);
   font-weight: 600;
   line-height: 1.35;
   pointer-events: none;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 #hud .warrior-name {
-  font-weight: 800;
-  color: var(--ns-text);
+  font-weight: 700;
+  color: var(--ui-text);
 }
 
 #hud-role {
-  color: var(--ns-text-dim);
+  color: var(--ui-text-dim);
   font-size: 0.88em;
 }
 
@@ -334,13 +324,13 @@ body {
   min-width: 54px;
   min-height: 54px;
   padding: 0.5rem;
-  font-family: var(--ns-font);
-  font-size: 0.88rem;
-  font-weight: 800;
-  border-radius: 14px;
-  border: 2px solid var(--ns-panel-edge);
-  background: rgba(30, 30, 34, 0.92);
-  color: var(--ns-text);
+  font-family: var(--ui-font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 2px solid var(--ui-panel-edge);
+  background: rgba(22, 21, 18, 0.92);
+  color: var(--ui-text);
   cursor: pointer;
   pointer-events: auto;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -384,9 +374,9 @@ body {
   width: 128px;
   height: 128px;
   border-radius: 50%;
-  background: rgba(25, 28, 32, 0.65);
-  border: 3px solid rgba(0, 195, 227, 0.45);
-  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.35);
+  background: rgba(22, 21, 19, 0.72);
+  border: 2px solid rgba(90, 100, 88, 0.55);
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
   pointer-events: auto;
   touch-action: none;
 }
@@ -399,8 +389,8 @@ body {
   height: 50px;
   margin: -25px 0 0 -25px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #3a3d45 0%, #2a2c32 100%);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #353330 0%, #252422 100%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -417,12 +407,12 @@ body {
   max-width: 90vw;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  background: rgba(20, 20, 24, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--ns-text);
-  font-family: var(--ns-font);
+  background: rgba(14, 13, 11, 0.9);
+  border: 1px solid rgba(90, 85, 75, 0.4);
+  color: var(--ui-text);
+  font-family: var(--ui-font);
   font-size: clamp(0.75rem, 2.5vw, 0.9rem);
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   pointer-events: none;
   opacity: 0;
